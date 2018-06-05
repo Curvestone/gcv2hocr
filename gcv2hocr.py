@@ -18,6 +18,9 @@ class GCVAnnotation:
     <meta name='ocr-langs' content='$lang' />
     <meta name='ocr-number-of-pages' content='1' />
     <meta name='ocr-capabilities' content='ocr_page ocr_carea ocr_line ocrx_word ocrp_lang'/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.rawgit.com/jadatkins/hOCR-visualiser/0733a7aa/visualise-hocr.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/jadatkins/hOCR-visualiser/0733a7aa/visualise-hocr.css">
   </head>
   <body>
     <div class='ocr_page' lang='$lang' title='bbox 0 0 $page_width $page_height'>
@@ -88,13 +91,13 @@ def fromResponse(resp, baseline_tolerance=2, **kwargs):
                 )
             continue
         word = GCVAnnotation(ocr_class='ocrx_word', content=anno_json['description'], box=box)
-#        if word.y1-abs(last_baseline) > baseline_tolerance:
-        curline = GCVAnnotation(
-                ocr_class='ocr_line',
-                htmlid="line_%d" % (len(page.content)),
-                content=[],
-                box=box)
-        page.content.append(curline)
+        if word.y1-abs(last_baseline) > baseline_tolerance or curline is None:
+            curline = GCVAnnotation(
+                    ocr_class='ocr_line',
+                    htmlid="line_%d" % (len(page.content)),
+                    content=[],
+                    box=box)
+            page.content.append(curline)
         last_baseline = word.y1
         word.htmlid="word_%d_%d" % (len(page.content) - 1, len(curline.content))
         curline.content.append(word)
